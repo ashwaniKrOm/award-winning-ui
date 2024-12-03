@@ -3,22 +3,28 @@ import Button from './Button';
 import { TiLocationArrow } from 'react-icons/ti';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import {ScrollTrigger} from "gsap/all"
 
+
+//scroll plugin gsap to enable animation while scrolling only
+gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () =>{
     const [currentIndex,setCurrentIndex]=useState(1);
     const [hasClicked,setHasClicked]=useState(false);
     const [loadedVideo,setLoadedVideo]=useState(0);
-    const [isLoading,setIsLoading]=useState(true);
+    const [isLoading,setIsLoading]=useState(false);
 
-    const totalVideos=3;
+    const totalVideos=4;
+
+    const currentVideoRef=useRef<HTMLVideoElement | null>(null);
     const nextVideoRef=useRef<HTMLVideoElement | null>(null);  //useRef is used to target specific DOM element, here is used to target the element within which video will play
 
     const handleVideoLoad =()=>{
         setLoadedVideo((prev)=>prev+1);
     }
 
-    // 0%3=>0 =>0+1=>1
+
     // 1%3=>0 =>1+1=>2
     // 2%3=>2 =>2+1=>3
     // 3%3=>0 =>0+1=>1
@@ -29,6 +35,12 @@ const Hero = () =>{
         setHasClicked(true);
         setCurrentIndex(upcomingVideoIndex);
     }
+
+    // useEffect(()=>{
+    //   if(loadedVideo === totalVideos-1){
+    //     setIsLoading(true);
+    //   }
+    // },[loadedVideo])
 
     //gsap code
     useGSAP(
@@ -43,13 +55,12 @@ const Hero = () =>{
               duration: 1,
               ease: "power1.inOut",
               onStart: () => {
-                try {
-                  nextVideoRef.current!.play();
-                } catch (error) {
-                  console.error("Playback failed:", error);
+                if (nextVideoRef.current) {
+                  nextVideoRef.current.play().catch((error) => {
+                    console.error("Playback failed:", error);
+                  });
                 }
               },
-              
             });
             gsap.from("#current-video", {
               transformOrigin: "center center",
@@ -88,6 +99,18 @@ const Hero = () =>{
 
     return (
         <div className='relative h-dvh w-screen  overflow-x-hidden'>
+            
+            {/* loading code */}
+            {isLoading && (
+              <div className=' absolute z-[100] w-screen h-dvh flex-center overflow-hidden bg-violet-50'>
+                <div className='three-body'>
+                  <div className='three-body__dot'/>
+                  <div className='three-body__dot'/>
+                  <div className='three-body__dot'/>
+                </div>
+              </div>
+            )}
+            
             <div
         id="video-frame"
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-tr-[50px] bg-blue-75"
@@ -98,7 +121,7 @@ const Hero = () =>{
                     {/* mini video player   */}
                     <div onClick={handleMiniVideoClick} className='origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100 '>
                         <video
-                        ref={nextVideoRef}
+                        ref={currentVideoRef}
                         src={getVideoSrc(upcomingVideoIndex)}   //since on click of small video, it will start play on big screen and the next index video set to the small video player
                         loop
                         muted
@@ -154,15 +177,9 @@ const Hero = () =>{
           </div>
         </div>
             </div>
-
-           
-
         <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
         G<b>A</b>MING
-      </h1>
-
-
-            
+      </h1>     
         </div>
     )
 }
