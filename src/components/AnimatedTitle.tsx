@@ -4,9 +4,10 @@ import gsap from "gsap"
 interface Props{
     title:string;
     className:string;
+    sectionId?:string;
 }
 
-const AnimatedTitle = ({title,className}:Props) =>{
+const AnimatedTitle = ({title,className,sectionId}:Props) =>{
 
     const containerRef=useRef(null);
 
