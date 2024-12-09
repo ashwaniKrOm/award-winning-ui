@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 interface Props{
-    id:string;
+    id?:string;
     title:string;
     leftIcon?:ReactNode;
     rightIcon?:ReactNode;
